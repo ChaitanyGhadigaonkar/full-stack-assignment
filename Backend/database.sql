@@ -13,16 +13,22 @@ SELECT * FROM users;
 CREATE TABLE cabs(
     id BIGSERIAL PRIMARY KEY NOT NULL,
     name VARCHAR(250) NOT NULL,
-    type VARCHAR(250) NOT NULL CHECK (type IN ('mini', 'sedan', 'suv')), 
+    fixedCharge INT NOT NULL,
+    perKmCharge INT NOT NULL,
+    image TEXT NOT NULL
 );
 
-CREATE TABLE booking(
+CREATE TABLE bookings(
     id BIGSERIAL PRIMARY KEY NOT NULL,
     user_id BIGINT NOT NULL,
     cab_id BIGINT NOT NULL,
     source VARCHAR(250) NOT NULL,
     destination VARCHAR(250) NOT NULL,
+    distance INT NOT NULL,
+    totalCharge INT NOT NULL,
     status VARCHAR(50) NOT NULL CHECK (status IN ('pending', 'cancelled', 'completed')) default 'pending',
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (cab_id) REFERENCES cabs(id)
 );
+
+insert into bookings(user_id, cab_id, source, destination, distance, totalCharge) values(12, 1, 'Delhi', 'Noida', 20, 500);

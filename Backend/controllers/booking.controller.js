@@ -2,16 +2,18 @@ import Joi from "joi"
 import PgClient from "../db.js"
 
 const bookingsSchema = Joi.object({
-  cabId: Joi.string().required(),
+  cabId: Joi.number().required(),
   source: Joi.string().required(),
   destination: Joi.string().required(),
+  distance: Joi.number().required(),
+  totalCharge: Joi.number().required(),
 })
 const getAllBookings = async (req, res) => {
   try {
     const user = req.user
     // console.log(user.id)
     const data = await PgClient.query(
-      "SELECT * FROM booking WHERE user_id = $1",
+      "SELECT * FROM bookings WHERE user_id = $1",
       [user.id]
     )
     res.status(200).json({ success: true, data: data.rows })
@@ -25,11 +27,10 @@ const createBooking = async (req, res) => {
     const user = req.user
     const validatedData = await bookingsSchema.validateAsync(req.body)
 
-    const { cabId, source, destination } = validatedData
-
+    const { cabId, source, destination, distance, totalCharge } = validatedData
     const data = await PgClient.query(
-      "INSERT INTO booking (user_id, cab_id, source, destination) VALUES ($1, $2, $3, $4) RETURNING *",
-      [user.id, cabId, source, destination]
+      "INSERT INTO bookings (user_id, cab_id, source, destination, distance, totalCharge) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [user.id, cabId, source, destination, distance, totalCharge]
     )
 
     res.status(201).json({ success: true, data: data.rows[0] })
@@ -42,7 +43,7 @@ const getBookingById = async (req, res) => {
   try {
     const user = req.user
     const { id } = req.params
-    const data = await PgClient.query("SELECT * FROM booking WHERE id = $1", [
+    const data = await PgClient.query("SELECT * FROM bookings WHERE id = $1", [
       id,
     ])
 
@@ -72,13 +73,17 @@ const updateBooking = async (req, res) => {
     const user = req.user
 
     const updateBookingSchema = Joi.object({
+      cabId: Joi.number().required(),
       source: Joi.string().required(),
       destination: Joi.string().required(),
+      distance: Joi.number().required(),
+      totalCharge: Joi.number().required(),
     })
-    const { source, destination } = updateBookingSchema.validateAsync(req.body)
+    const { source, destination, cabId, distance, totalCharge } =
+      await updateBookingSchema.validateAsync(req.body)
 
     const bookingDetails = await PgClient.query(
-      "SELECT * FROM booking WHERE id = $1",
+      "SELECT * FROM bookings WHERE id = $1",
       [id]
     )
 
@@ -93,8 +98,8 @@ const updateBooking = async (req, res) => {
     }
 
     const data = await PgClient.query(
-      "UPDATE booking SET source = $1, destination = $2 WHERE id = $3 RETURNING *",
-      [source, destination, id]
+      "UPDATE bookings SET cab_id = $1, source=$2, destination=$3, distance = $4, totalCharge = $5 WHERE id = $6 RETURNING *",
+      [cabId, source, destination, distance, totalCharge, id]
     )
 
     res.status(200).json({ success: true, data: data.rows[0] })
@@ -109,7 +114,7 @@ const cancelBooking = async (req, res) => {
     const user = req.user
 
     const bookingDetails = await PgClient.query(
-      "SELECT * FROM booking WHERE id = $1",
+      "SELECT * FROM bookings WHERE id = $1",
       [id]
     )
 
@@ -122,10 +127,9 @@ const cancelBooking = async (req, res) => {
     if (parseInt(bookingDetails.rows[0].user_id) !== user.id) {
       return res.status(401).json({ success: false, message: "Unauthorized" })
     }
-    const { source, destination } = bookingDetails.rows[0]
     const data = await PgClient.query(
-      "UPDATE booking SET source=$1, destination=$2, status = 'cancelled' WHERE id = $3 RETURNING *",
-      [source, destination, id]
+      "UPDATE bookings SET status = 'cancelled' WHERE id = $1 RETURNING *",
+      [id]
     )
 
     res.status(200).json({ success: true, data: data.rows[0] })

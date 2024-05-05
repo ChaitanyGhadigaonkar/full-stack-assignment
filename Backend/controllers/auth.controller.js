@@ -15,7 +15,6 @@ export const userRegisterSchema = Joi.object({
 export const userLoginSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).max(30).required(),
-  cPassword: Joi.ref("password"),
 })
 
 // register /api/auth/register
@@ -45,12 +44,7 @@ const registerUser = async (req, res) => {
 
 const loginHandler = async (req, res) => {
   const validatedData = await userLoginSchema.validateAsync(req.body)
-  const { email, password, cPassword } = validatedData
-
-  if (password !== cPassword) {
-    res.status(400).json({ success: false, error: "passwords not matching" })
-    return
-  }
+  const { email, password } = validatedData
 
   const checkingIsExists = await PgClient.query(
     "SELECT * FROM users WHERE email = $1",
@@ -91,7 +85,13 @@ const loginHandler = async (req, res) => {
   })
   res
     .status(201)
-    .json({ success: true, data: { message: "successfully login" } })
+    .json({
+      success: true,
+      data: {
+        message: "successfully login",
+        userDetails: { email: user.email, role: user.role, id: user.id },
+      },
+    })
 }
 
 const logoutHandler = async (req, res) => {

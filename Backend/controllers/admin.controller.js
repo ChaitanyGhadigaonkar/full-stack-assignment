@@ -3,10 +3,10 @@ import PgClient from "../db.js"
 // cabs
 const createCab = async (req, res) => {
   try {
-    const { name, type } = req.body
+    const { name, fixedCharge, perKmCharge, image } = req.body
     const data = await PgClient.query(
-      "INSERT INTO cabs (name, type) VALUES ($1, $2) RETURNING *",
-      [name, type]
+      "INSERT INTO cabs (name, fixedCharge, perKmCharge, image) VALUES ($1, $2, $3, $4) RETURNING *",
+      [name, fixedCharge, perKmCharge, image]
     )
     res.status(201).json({ success: true, data: data.rows[0] })
   } catch (error) {
@@ -33,12 +33,12 @@ const deleteCab = async (req, res) => {
 
 const updateCab = async (req, res) => {
   const { id } = req.params
-  const { name, type } = req.body
+  const { name, fixedCharge, perKmCharge, image } = req.body
 
   try {
     const data = await PgClient.query(
-      "UPDATE cabs SET name = $1, type = $2 WHERE id = $3 RETURNING *",
-      [name, type, id]
+      "UPDATE cabs SET name = $1, fixedCharge = $2, perKmCharge = $3, image = $4 WHERE id = $5 RETURNING *",
+      [name, fixedCharge, perKmCharge, image, id]
     )
     if (data.rows.length === 0) {
       res.status(404).json({ success: false, message: "Cab not found" })
@@ -54,11 +54,10 @@ const updateCab = async (req, res) => {
 const createBooking = async (req, res) => {
   try {
     const user = req.user
-    const { cabId, source, destination } = req.body
-
+    const { cabId, source, destination, distance, totalCharge } = req.body
     const data = await PgClient.query(
-      "INSERT INTO booking (user_id, cab_id, source, destination) VALUES ($1, $2, $3, $4) RETURNING *",
-      [user.id, cabId, source, destination]
+      "INSERT INTO bookings (user_id, cab_id, source, destination, distance, totalCharge) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [user.id, cabId, source, destination, distance, totalCharge]
     )
 
     res.status(201).json({ success: true, data: data.rows[0] })
@@ -71,7 +70,7 @@ const deleteBooking = async (req, res) => {
   try {
     const { id } = req.params
     const data = await PgClient.query(
-      "DELETE FROM booking WHERE id = $1 RETURNING *",
+      "DELETE FROM bookings WHERE id = $1 RETURNING *",
       [id]
     )
 
@@ -93,7 +92,7 @@ const updateBooking = async (req, res) => {
     const { source, destination } = req.body
 
     const data = await PgClient.query(
-      "UPDATE booking SET source = $1, destination = $2 WHERE id = $3 RETURNING *",
+      "UPDATE bookings SET source = $1, destination = $2 WHERE id = $3 RETURNING *",
       [source, destination, id]
     )
 
