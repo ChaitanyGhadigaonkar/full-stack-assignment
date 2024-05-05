@@ -7,6 +7,11 @@ import Root from "./Root"
 import Admin from "./Admin"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
+import Home from "./pages/Home"
+import Users from "./pages/users/Users"
+import BookNow from "./pages/users/bookings/BookNow"
+import Bookings from "./pages/users/bookings/Bookings"
+import Profile from "./pages/users/profile/profile"
 
 const router = createBrowserRouter([
   {
@@ -15,7 +20,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <h1>Home</h1>,
+        element: <Home />,
       },
       {
         path: "login",
@@ -27,12 +32,16 @@ const router = createBrowserRouter([
       },
       {
         path: "users",
-        element: <h1>users</h1>,
+        element: <Users />,
         children: [
-          { path: "", element: <h1>users</h1> },
+          { path: "book-now", element: <BookNow /> },
           {
-            path: ":id",
-            element: <h1>user with userId</h1>,
+            path: "bookings",
+            element: <Bookings />,
+          },
+          {
+            path: "profile",
+            element: <Profile />,
           },
         ],
       },

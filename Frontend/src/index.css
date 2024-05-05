@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .default-btn {
+    @apply px-3 py-2 border text-white bg-slate-950 rounded-md font-semibold hover:bg-slate-800 transition-all duration-150;
+  }
+  .ghost {
+    @apply px-3 py-2 border text-slate-950 bg-white rounded-md font-semibold hover:bg-slate-100 transition-all duration-150;
+  }
+  .primary {
+    @apply bg-blue-500 text-white px-3 py-2 rounded-md my-2 w-72;
+  }
+  .danger {
+    @apply bg-red-500 text-white px-3 py-2 rounded-md my-2 w-72;
+  }
+}
