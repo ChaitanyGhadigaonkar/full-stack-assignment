@@ -1,14 +1,26 @@
 import { LogOut, Menu } from "lucide-react"
-import React from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { useSidebarContext } from "../context/SidebarContext"
+import useFetch from "../hooks/useFetch"
+import toast from "react-hot-toast"
 
 const Header = () => {
   const { pathname } = useLocation()
   const { openSidebar } = useSidebarContext()
 
   const isAuthenticated = JSON.parse(localStorage.getItem("userDetails"))
-  const logout = () => {}
+
+  const logout = async () => {
+    const resData = await useFetch("/api/auth/logout", "get", null)
+    // console.log(resData)
+    if (resData?.success) {
+      localStorage.removeItem("userDetails")
+      toast.success("Logged out successfully")
+      window.location.href = "/"
+    }
+  }
+
   return (
     <div className="px-1 py-3 flex justify-between items-center">
       <div className="logo flex gap-2 items-center">

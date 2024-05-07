@@ -36,7 +36,7 @@ const registerUser = async (req, res) => {
 
     res.status(200).json({ success: true, data: { user: data.rows[0] } })
   } catch (error) {
-    res.status(400).json({ success: false, error: error })
+    res.status(400).json({ success: false, error: error?.detail })
   }
 }
 
@@ -79,24 +79,23 @@ const loginHandler = async (req, res) => {
 
   res.cookie("jwt", authToken, {
     httpOnly: true,
-    secure: false,
+    secure: true, // set to false for using thunder client
     sameSite: "none",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   })
-  res
-    .status(201)
-    .json({
-      success: true,
-      data: {
-        message: "successfully login",
-        userDetails: { email: user.email, role: user.role, id: user.id },
-      },
-    })
+  res.status(201).json({
+    success: true,
+    data: {
+      message: "successfully login",
+      userDetails: { email: user.email, role: user.role, id: user.id },
+    },
+  })
 }
 
 const logoutHandler = async (req, res) => {
   const authToken = req.cookies?.jwt
-  // console.log(authToken)
+  // console.log(req.cookies)
+
   if (!authToken) {
     res.status(400).json({ success: false, error: "Invalid token" })
     return

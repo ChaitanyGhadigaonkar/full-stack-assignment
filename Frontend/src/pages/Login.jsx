@@ -21,6 +21,10 @@ const Login = () => {
     toast.success(data.data.message)
     localStorage.setItem("userDetails", JSON.stringify(data.data.userDetails))
     setCredentials({ email: "", password: "" })
+    if (data.data.userDetails.role === "admin") {
+      navigate("/admin/dashboard")
+      return
+    }
     navigate("/users/book-now")
   }
 

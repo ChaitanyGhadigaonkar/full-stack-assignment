@@ -1,4 +1,6 @@
+import Joi from "joi"
 import PgClient from "../db.js"
+import bcrypt from "bcrypt"
 
 // cabs
 const createCab = async (req, res) => {
@@ -51,13 +53,23 @@ const updateCab = async (req, res) => {
 }
 
 // bookings
+
+const getBookings = async (req, res) => {
+  try {
+    const data = await PgClient.query("SELECT * FROM bookings")
+    res.status(200).json({ success: true, data: data.rows })
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message })
+  }
+}
 const createBooking = async (req, res) => {
   try {
     const user = req.user
-    const { cabId, source, destination, distance, totalCharge } = req.body
+    const { cab_id, user_id, source, destination, distance, totalcharge } =
+      req.body
     const data = await PgClient.query(
-      "INSERT INTO bookings (user_id, cab_id, source, destination, distance, totalCharge) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [user.id, cabId, source, destination, distance, totalCharge]
+      "INSERT INTO bookings (user_id, cab_id, source, destination, distance, totalcharge) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [user_id, cab_id, source, destination, distance, totalcharge]
     )
 
     res.status(201).json({ success: true, data: data.rows[0] })
@@ -89,11 +101,11 @@ const deleteBooking = async (req, res) => {
 const updateBooking = async (req, res) => {
   try {
     const { id } = req.params
-    const { source, destination } = req.body
+    const { source, destination, status } = req.body
 
     const data = await PgClient.query(
-      "UPDATE bookings SET source = $1, destination = $2 WHERE id = $3 RETURNING *",
-      [source, destination, id]
+      "UPDATE bookings SET source = $1, destination = $2, status = $3 WHERE id = $4 RETURNING *",
+      [source, destination, status, id]
     )
 
     if (data.rows.length === 0) {
@@ -101,8 +113,16 @@ const updateBooking = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Booking not found" })
     }
+    const cabDetails = await PgClient.query(
+      "select * from cabs where id = $1",
+      [data.rows[0].cab_id]
+    )
 
-    res.status(200).json({ success: true, data: data.rows[0] })
+    const resData = {
+      ...data.rows[0],
+      cabDetails: cabDetails.rows[0],
+    }
+    res.status(200).json({ success: true, data: resData })
   } catch (err) {
     res.status(400).json({ success: false, message: err.message })
   }
@@ -133,20 +153,22 @@ const getUserById = async (req, res) => {
 }
 const addUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body
-    if (role) {
-      const data = await PgClient.query(
-        "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING *",
-        [name, email, password, role]
-      )
-      res.status(201).json({ success: true, data: data.rows[0] })
-      return
-    }
+    const schema = Joi.object({
+      name: Joi.string().required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+      cPassword: Joi.ref("password"),
+      role: Joi.string().required(),
+    })
+    const validatedData = await schema.validateAsync(req.body)
+    const hashedPassword = bcrypt.hashSync(validatedData.password, 10)
+
     const data = await PgClient.query(
-      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
-      [name, email, password]
+      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)  RETURNING id, email",
+      [validatedData.name, validatedData.email, hashedPassword]
     )
-    res.status(201).json({ success: true, data: data.rows[0] })
+
+    res.status(200).json({ success: true, data: { user: data.rows[0] } })
   } catch (err) {
     res.status(400).json({ success: false, message: err.message })
   }
@@ -173,11 +195,11 @@ const deleteUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params
-    const { name, email, password, role } = req.body
+    const { name, email, role } = req.body
 
     const data = await PgClient.query(
-      "UPDATE users SET name = $1, email = $2, password = $3, role = $4 WHERE id = $5 RETURNING *",
-      [name, email, password, role, id]
+      "UPDATE users SET name = $1, email = $2, role = $3 WHERE id = $4 RETURNING *",
+      [name, email, role, id]
     )
 
     if (data.rows.length === 0) {
@@ -195,6 +217,7 @@ const adminController = {
   deleteCab,
   updateCab,
   createBooking,
+  getBookings,
   deleteBooking,
   updateBooking,
   getUsers,

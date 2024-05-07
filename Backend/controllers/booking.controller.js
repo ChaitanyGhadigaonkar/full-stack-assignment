@@ -16,7 +16,16 @@ const getAllBookings = async (req, res) => {
       "SELECT * FROM bookings WHERE user_id = $1",
       [user.id]
     )
-    res.status(200).json({ success: true, data: data.rows })
+
+    const resData = []
+
+    for (let i = 0; i < data.rows.length; i++) {
+      const cabData = await PgClient.query("SELECT * FROM cabs WHERE id = $1", [
+        data.rows[i].cab_id,
+      ])
+      resData.push({ ...data.rows[i], cabDetails: cabData.rows[0] })
+    }
+    res.status(200).json({ success: true, data: resData })
   } catch (err) {
     res.status(400).json({ success: false, message: err.message })
   }

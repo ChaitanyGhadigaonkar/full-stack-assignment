@@ -1,7 +1,16 @@
-import React from "react"
-import { Link } from "react-router-dom"
+import React, { useEffect } from "react"
+import { Link, useNavigate } from "react-router-dom"
 
 const Home = () => {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    // console.log(JSON.parse(localStorage.getItem("userDetails")))
+    if (JSON.parse(localStorage.getItem("userDetails"))?.role === "admin") {
+      navigate("/admin/dashboard")
+    }
+  }, [])
+
   return (
     <div className="flex-1 h-full">
       <div className="top flex justify-center flex-col gap-2 py-10 md:py-20">

@@ -20,6 +20,7 @@ adminRouter
 adminRouter
   .route("/bookings")
   .post(isAuthenticated, isAdmin, adminController.createBooking)
+  .get(isAuthenticated, isAdmin, adminController.getBookings)
 
 adminRouter
   .route("/bookings/:id")

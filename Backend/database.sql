@@ -10,6 +10,9 @@ CREATE TABLE users(
 
 SELECT * FROM users;
 
+-- set role to admin 
+update users set role = 'admin' where id = 13; 
+
 CREATE TABLE cabs(
     id BIGSERIAL PRIMARY KEY NOT NULL,
     name VARCHAR(250) NOT NULL,
@@ -27,7 +30,7 @@ CREATE TABLE bookings(
     distance INT NOT NULL,
     totalCharge INT NOT NULL,
     status VARCHAR(50) NOT NULL CHECK (status IN ('pending', 'cancelled', 'completed')) default 'pending',
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (cab_id) REFERENCES cabs(id)
 );
 

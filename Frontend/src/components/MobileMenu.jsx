@@ -1,14 +1,26 @@
 import { LogOut, X } from "lucide-react"
 import { useSidebarContext } from "../context/SidebarContext"
 import { useNavigate, Link, useLocation } from "react-router-dom"
+import { toast } from "react-hot-toast"
+import useFetch from "../hooks/useFetch"
+import { useEffect } from "react"
 
 const MobileMenu = () => {
   const { pathname } = useLocation()
-  const { closeSidebar, sidebarState } = useSidebarContext()
   const navigate = useNavigate()
-  const isAuthenticated = JSON.parse(localStorage.getItem("userDetails"))
 
-  const logout = () => {}
+  const { closeSidebar, sidebarState } = useSidebarContext()
+
+  let isAuthenticated = JSON.parse(localStorage.getItem("userDetails"))
+
+  const logout = async () => {
+    const { success, data } = await useFetch("/api/auth/logout", "get", null)
+
+    localStorage.removeItem("userDetails")
+    toast.success(data.message)
+    navigate("/login")
+  }
+
   return (
     <div
       className={`overlay fixed flex inset-0 bg-[#33333380] z-20 w-full min-h-screen transition-transform  duration-700 ${

@@ -8,7 +8,7 @@ const Modal = () => {
   if (!modalState) return null
   return createPortal(
     <div className="fixed inset-0 w-screen h-screen bg-slate-50/90 bg-opacity-10 flex items-center justify-center">
-      <div className="max-w-96 border border-slate-600 h-max-content px-6 py-4 rounded-2xl">
+      <div className="max-w-96 border border-slate-600 h-max-content px-6 py-4 rounded-2xl bg-slate-100">
         <div className="flex w-full justify-end mb-2">
           <X
             onClick={() => closeModal()}

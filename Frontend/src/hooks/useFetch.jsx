@@ -5,6 +5,7 @@ const host = "http://localhost:5500"
 
 const useFetch = async (endpoint, method, body) => {
   const url = `${host}${endpoint}`
+  axios.defaults.withCredentials = true
   const headers = {
     "Content-Type": "application/json",
   }
@@ -15,7 +16,6 @@ const useFetch = async (endpoint, method, body) => {
         method,
         url,
         headers,
-        withCredentials: true,
       })
       return response.data
     }
@@ -26,7 +26,6 @@ const useFetch = async (endpoint, method, body) => {
         url,
         data: JSON.stringify(body),
         headers,
-        withCredentials: true,
       })
 
       return response.data
@@ -37,7 +36,6 @@ const useFetch = async (endpoint, method, body) => {
         method: "delete",
         url,
         headers,
-        withCredentials: true,
       })
       return response.data
     }
