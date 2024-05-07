@@ -40,8 +40,12 @@ const useFetch = async (endpoint, method, body) => {
       return response.data
     }
   } catch (error) {
-    toast.error(error.response.data.error)
-    console.log(error)
+    console.log(error.response.data)
+    if (error.response.data) {
+      toast.error(error.response.data.error)
+      return
+    }
+    toast.error("An error occurred. Please try again later.")
   }
 }
 
