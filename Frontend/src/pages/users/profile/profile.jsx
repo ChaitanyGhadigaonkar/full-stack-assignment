@@ -1,11 +1,27 @@
 import { EditIcon } from "lucide-react"
-import React, { useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useModalContext } from "../../../context/ModalContext"
+import useFetch from "../../../hooks/useFetch"
+import toast from "react-hot-toast"
 
 const Profile = () => {
   const inputProfileRef = useRef(null)
 
   const { setModalChildren, openModal } = useModalContext()
+
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [user, setUser] = useState()
+  const getUserDetails = async () => {
+    const resData = await useFetch("/api/users/user-details", "get", {})
+
+    const { success } = resData
+    if (success) {
+      setEmail(resData.data.email)
+      setName(resData.data.name)
+      setUser(resData.data)
+    }
+  }
 
   const handleUpdatePassword = () => {
     setModalChildren(
@@ -33,6 +49,23 @@ const Profile = () => {
     )
     openModal()
   }
+
+  const updateDetails = async () => {
+    const resData = await useFetch("/api/users/update-details", "put", {
+      name,
+      email,
+    })
+    // console.log(resData)
+    if (resData.success) {
+      toast.success("Details updated successfully")
+    } else {
+      toast.error("Failed to update details")
+    }
+  }
+
+  useEffect(() => {
+    getUserDetails()
+  }, [])
   return (
     <div className="flex flex-1 flex-col gap-10 items-center justify-center">
       <div className="flex flex-col items-center justify-center relative">
@@ -52,9 +85,9 @@ const Profile = () => {
           className="absolute right-1 bottom-7 cursor-pointer"
           onClick={() => inputProfileRef.current.click()}
         />
-        <h1 className="text-2xl font-semibold">John Doe</h1>
       </div>
 
+      <h1 className="text-2xl font-semibold">{user && user.name}</h1>
       <div className="w-full flex flex-col md:px-8 gap-4">
         <h1 className="text-xl font-semibold">Personal Information</h1>
 
@@ -65,10 +98,15 @@ const Profile = () => {
               <input
                 type="text"
                 className="border rounded-md text-sm md:text-base px-3 py-2 my-2 md:w-72 lg:w-96"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
             </div>
 
-            <button className="default-btn text-sm md:text-base">
+            <button
+              className="default-btn text-sm md:text-base"
+              onClick={updateDetails}
+            >
               update name
             </button>
           </div>
@@ -78,10 +116,15 @@ const Profile = () => {
               <input
                 type="email"
                 className="border rounded-md text-sm md:text-base px-3 py-2 my-2 md:w-72 lg:w-96"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
-            <button className="default-btn text-sm md:text-base">
+            <button
+              className="default-btn text-sm md:text-base"
+              onClick={updateDetails}
+            >
               update email
             </button>
           </div>
