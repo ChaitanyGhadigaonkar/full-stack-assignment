@@ -16,6 +16,8 @@ import Dashboard from "./pages/admin/Dashboard"
 import AdminUsers from "./pages/admin/Users"
 import AdminBookings from "./pages/admin/Bookings"
 import AdminCabs from "./pages/admin/Cabs"
+import ForgotPassword from "./pages/ForgotPassword"
+import ResetPassword from "./pages/ResetPassword"
 
 const router = createBrowserRouter([
   {
@@ -33,6 +35,14 @@ const router = createBrowserRouter([
       {
         path: "register",
         element: <Register />,
+      },
+      {
+        path: "forgot-password",
+        element: <ForgotPassword />,
+      },
+      {
+        path: "reset-password/:token",
+        element: <ResetPassword />,
       },
       {
         path: "users",

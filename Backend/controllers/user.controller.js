@@ -1,10 +1,17 @@
 import cloudinary from "cloudinary"
-import multer from "multer"
 
 const updateAvatar = async (req, res) => {
   try {
     // Upload the file to Cloudinary
-    const result = await cloudinary.v2.uploader.upload(req.file.path)
+
+    const file = req.file
+    if (!file) {
+      res.status(400).json({ message: "Please upload a file" })
+      return
+    }
+
+    console.log(req.file)
+    // const result = await cloudinary.v2.uploader.upload(req.file.path)
     console.log(result)
     res.status(200).json({ message: "File uploaded successfully", result })
   } catch (err) {

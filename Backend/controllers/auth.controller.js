@@ -2,7 +2,7 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
 import PgClient from "../db.js"
-import { JWT_SECRET } from "../config.js"
+import { JWT_SECRET, PORT } from "../config.js"
 import Joi from "joi"
 
 export const userRegisterSchema = Joi.object({
@@ -106,5 +106,57 @@ const logoutHandler = async (req, res) => {
     .json({ success: true, data: { message: "successfully logout" } })
 }
 
-const authController = { registerUser, loginHandler, logoutHandler }
+const forgotPassword = async (req, res) => {
+  const { email } = req.body
+
+  const checkingIsExists = await PgClient.query(
+    "SELECT * FROM users WHERE email = $1",
+    [email]
+  )
+
+  if (checkingIsExists.rowCount === 0) {
+    res.status(400).json({ success: false, error: "Email does not exists" })
+    return
+  }
+
+  // reset password link
+
+  const resetPasswordToken = jwt.sign(
+    { id: checkingIsExists.rows[0].id },
+    JWT_SECRET,
+    { expiresIn: 15 * 60 * 60 }
+  ) // 15 minutes
+
+  const resetPasswordLink = `http://localhost:5173/reset-password/${resetPasswordToken}`
+  res.status(201).json({ success: true, data: { resetPasswordLink } })
+}
+
+const resetPassword = async (req, res) => {
+  const { token, password, cPassword } = req.body
+
+  if (password !== cPassword) {
+    res.status(400).json({ success: false, error: "passwords not matching" })
+    return
+  }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET)
+    const hashedPassword = bcrypt.hashSync(password, 10)
+
+    const data = await PgClient.query(
+      "UPDATE users SET password = $1 WHERE id = $2 RETURNING email",
+      [hashedPassword, decoded.id]
+    )
+
+    res.status(200).json({ success: true, data: { email: data.rows[0].email } })
+  } catch (error) {
+    res.status(400).json({ success: false, error: error?.message })
+  }
+}
+const authController = {
+  registerUser,
+  loginHandler,
+  logoutHandler,
+  forgotPassword,
+  resetPassword,
+}
 export default authController
