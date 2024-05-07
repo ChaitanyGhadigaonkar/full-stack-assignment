@@ -38,7 +38,7 @@ const Bookings = () => {
           onClick={handleAddBooking}
         >
           <Plus size={20} />
-          Add Cabs
+          Add Bookings
         </button>
       </div>
 

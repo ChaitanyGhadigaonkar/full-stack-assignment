@@ -52,7 +52,7 @@ const AddBooking = () => {
   }, [])
   return (
     <div>
-      <h1 className="text-xl font-semibold w-80">Edit Booking Modal</h1>
+      <h1 className="text-xl font-semibold w-80">Add Booking</h1>
       <div className="flex gap-2 items-center my-1">
         <label
           htmlFor="cabId"

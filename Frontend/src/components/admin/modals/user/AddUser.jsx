@@ -30,7 +30,7 @@ const AddUser = () => {
   }
   return (
     <div>
-      <h1 className="text-xl font-semibold w-80">Edit user Modal</h1>
+      <h1 className="text-xl font-semibold w-80">Add user Modal</h1>
 
       <div className="flex gap-2 items-center my-1">
         <label
@@ -119,7 +119,7 @@ const AddUser = () => {
           className="primary w-32 font-semibold disabled:cursor-not-allowed"
           onClick={addUser}
         >
-          Add Uset
+          Add User
         </button>
       </div>
     </div>
